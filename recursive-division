@@ -1,2 +1,48 @@
 #!/usr/bin/env ruby
-puts 'Initial commit'
+
+require 'json'
+
+def divide(walls, x_start, z_start, x_end, z_end)
+  width = (x_end - x_start)
+  height = (z_end - z_start)
+
+  return if width < 8 || height < 8
+
+  if width <= height
+    # horizontal wall
+    wall_z = z_start + rand(height)
+    gap_x = x_start + rand(width)
+
+    walls <<
+      {:begin => {:x => x_start, :z => wall_z}, :end => {:x => gap_x, :z => wall_z}} <<
+      {:begin => {:x => gap_x + 1, :z => wall_z}, :end => {:x => x_end, :z => wall_z}}
+
+    divide(walls, x_start, z_start, x_end, wall_z)
+    divide(walls, x_start, wall_z, x_end, z_end)
+  elsif width > height
+    # vertical wall
+    wall_x = x_start + rand(width)
+    gap_z = z_start + rand(height)
+
+    walls <<
+      {:begin => {:x => wall_x, :z => z_start}, :end => {:x => wall_x, :z => gap_z}} <<
+      {:begin => {:x => wall_x, :z => gap_z + 1}, :end => {:x => wall_x, :z => z_end}}
+
+    divide(walls, x_start, z_start, wall_x, z_end)
+    divide(walls, wall_x, z_start, x_end, z_end)
+  end
+end
+
+walls = []
+divide(walls, 0, 0, 20, 20)
+
+level = {
+  :name => 'levelx',
+  :dimensions => {:x => 20, :z => 20},
+  :camera => {:x => 0, :y => 30, :z => 0.5},
+  :target => {:x => 1, :z => 1},
+  :ball => {:x => 3, :z => 3},
+  :walls => walls
+}
+
+puts level.to_json
