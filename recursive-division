@@ -6,42 +6,58 @@ def divide(walls, x_start, z_start, x_end, z_end)
   width = (x_end - x_start)
   height = (z_end - z_start)
 
-  return if width < 8 || height < 8
+  return if width < 2 || height < 2
 
-  if width <= height
+  coin_flip = rand(2)
+
+  if width < height || (width == height && coin_flip == 0)
     # horizontal wall
-    wall_z = z_start + rand(height)
-    gap_x = x_start + rand(width)
+    wall_z = z_start + 1 + rand(height - 1)
+    gap_x = x_start + 1 + rand(width - 1)
 
-    walls <<
-      {:begin => {:x => x_start, :z => wall_z}, :end => {:x => gap_x, :z => wall_z}} <<
-      {:begin => {:x => gap_x + 1, :z => wall_z}, :end => {:x => x_end, :z => wall_z}}
+    walls << {:begin => {:x => x_start, :z => wall_z}, :end => {:x => gap_x, :z => wall_z}}
+    walls << {:begin => {:x => gap_x + 1, :z => wall_z}, :end => {:x => x_end, :z => wall_z}}
 
     divide(walls, x_start, z_start, x_end, wall_z)
     divide(walls, x_start, wall_z, x_end, z_end)
-  elsif width > height
+  elsif width > height || (width == height && coin_flip == 1)
     # vertical wall
-    wall_x = x_start + rand(width)
-    gap_z = z_start + rand(height)
+    wall_x = x_start + 1 + rand(width - 1)
+    gap_z = z_start + 1 + rand(height - 1)
 
-    walls <<
-      {:begin => {:x => wall_x, :z => z_start}, :end => {:x => wall_x, :z => gap_z}} <<
-      {:begin => {:x => wall_x, :z => gap_z + 1}, :end => {:x => wall_x, :z => z_end}}
+    walls << {:begin => {:x => wall_x, :z => z_start}, :end => {:x => wall_x, :z => gap_z}}
+    walls << {:begin => {:x => wall_x, :z => gap_z + 1}, :end => {:x => wall_x, :z => z_end}}
 
     divide(walls, x_start, z_start, wall_x, z_end)
     divide(walls, wall_x, z_start, x_end, z_end)
   end
 end
 
+X_SIZE = 13
+Z_SIZE = 9
+
 walls = []
-divide(walls, 0, 0, 20, 20)
+walls << {:begin => {:x => 0, :z => 0}, :end => {:x => X_SIZE, :z => 0}}
+walls << {:begin => {:x => X_SIZE, :z => 0}, :end => {:x => X_SIZE, :z => Z_SIZE}}
+walls << {:begin => {:x => X_SIZE, :z => Z_SIZE}, :end => {:x => 0, :z => Z_SIZE}}
+walls << {:begin => {:x => 0, :z => Z_SIZE}, :end => {:x => 0, :z => 0}}
+
+divide(walls, 0, 0, X_SIZE, Z_SIZE)
+
+# scale the walls up to actual size
+walls.each do |wall|
+  wall[:begin][:x] = (wall[:begin][:x]) * 4
+  wall[:begin][:z] = (wall[:begin][:z]) * 4
+  wall[:end][:x] = (wall[:end][:x]) * 4
+  wall[:end][:z] = (wall[:end][:z]) * 4
+end
 
 level = {
   :name => 'levelx',
-  :dimensions => {:x => 20, :z => 20},
-  :camera => {:x => 0, :y => 30, :z => 0.5},
-  :target => {:x => 1, :z => 1},
-  :ball => {:x => 3, :z => 3},
+  :dimensions => {:x => X_SIZE * 4, :z => Z_SIZE * 4},
+  :camera => {:x => 0, :y => 35, :z => 0.5},
+  :target => {:x => 1, :z => 1.5},
+  :ball => {:x => 24, :z => 16},
   :walls => walls
 }
 
