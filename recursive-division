@@ -3,8 +3,7 @@
 require 'json'
 
 def divide(walls, x_start, z_start, x_end, z_end)
-  width = (x_end - x_start)
-  height = (z_end - z_start)
+  width, height = (x_end - x_start), (z_end - z_start)
 
   return if width < 2 || height < 2
 
@@ -33,32 +32,26 @@ def divide(walls, x_start, z_start, x_end, z_end)
   end
 end
 
-X_SIZE = 13
-Z_SIZE = 9
+X_SIZE, Z_SIZE = 13, 9
 
-walls = []
-walls << {:begin => {:x => 0, :z => 0}, :end => {:x => X_SIZE, :z => 0}}
-walls << {:begin => {:x => X_SIZE, :z => 0}, :end => {:x => X_SIZE, :z => Z_SIZE}}
-walls << {:begin => {:x => X_SIZE, :z => Z_SIZE}, :end => {:x => 0, :z => Z_SIZE}}
-walls << {:begin => {:x => 0, :z => Z_SIZE}, :end => {:x => 0, :z => 0}}
+walls = [{:begin => {:x => 0, :z => 0}, :end => {:x => X_SIZE, :z => 0}},
+         {:begin => {:x => X_SIZE, :z => 0}, :end => {:x => X_SIZE, :z => Z_SIZE}},
+         {:begin => {:x => X_SIZE, :z => Z_SIZE}, :end => {:x => 0, :z => Z_SIZE}},
+         {:begin => {:x => 0, :z => Z_SIZE}, :end => {:x => 0, :z => 0}}]
 
 divide(walls, 0, 0, X_SIZE, Z_SIZE)
 
 # scale the walls up to actual size
-walls.each do |wall|
-  wall[:begin][:x] = (wall[:begin][:x]) * 4
-  wall[:begin][:z] = (wall[:begin][:z]) * 4
-  wall[:end][:x] = (wall[:end][:x]) * 4
-  wall[:end][:z] = (wall[:end][:z]) * 4
+walls = walls.map do |w|
+  {:begin => {:x => w[:begin][:x] * 4, :z => w[:begin][:z] * 4},
+   :end => {:x => w[:end][:x] * 4, :z => w[:end][:z] * 4}}
 end
 
-level = {
-  :name => 'levelx',
-  :dimensions => {:x => X_SIZE * 4, :z => Z_SIZE * 4},
-  :camera => {:x => 0, :y => 35, :z => 0.5},
-  :target => {:x => 1, :z => 1.5},
-  :ball => {:x => 24, :z => 16},
-  :walls => walls
-}
+level = {:name => 'levelx',
+         :dimensions => {:x => X_SIZE * 4, :z => Z_SIZE * 4},
+         :camera => {:x => 0, :y => 35, :z => 0.5},
+         :target => {:x => 1, :z => 1.5},
+         :ball => {:x => 24, :z => 16},
+         :walls => walls}
 
 puts level.to_json
